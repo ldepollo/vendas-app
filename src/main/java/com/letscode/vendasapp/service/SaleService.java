@@ -11,12 +11,6 @@ import java.util.concurrent.atomic.AtomicReference;
 @Service
 public class SaleService {
 
-    private final SalesRepository salesRepository;
-
-    public SaleService(SalesRepository salesRepository) {
-        this.salesRepository = salesRepository;
-    }
-
     public Mono<Sale> makePurchase(Cart cart) {
         return Mono.just(cart)
                 .map(c -> new Sale(c.getId(), c.getUsername(), getTotalAmount(c)));

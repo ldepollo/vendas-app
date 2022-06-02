@@ -1,0 +1,31 @@
+server:
+  port: 80
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://eureka-server:8761/eureka
+  instance:
+    preferIpAddress: true
+    nonSecurePort: 80
+
+spring:
+  application:
+    name: vendas-service
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: vendas
+
+produtos.base.url: http://produtos-app-instance:80/product/%s
+usuarios.base.url: http://usuarios-app-instance:80/user/%s

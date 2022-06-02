@@ -1,7 +1,6 @@
 package com.letscode.vendasapp.handler;
 
 import com.letscode.vendasapp.dto.CartRequestDto;
-import com.letscode.vendasapp.dto.UserRequestDto;
 import com.letscode.vendasapp.repository.CartRepository;
 import com.letscode.vendasapp.service.CartService;
 import org.springframework.stereotype.Component;
@@ -30,7 +29,7 @@ public class CartHandler {
     }
 
     public Mono<ServerResponse> removeItemFromCart(ServerRequest request) {
-        return request.bodyToMono(CartRequestDto.class)
+        return Mono.just(new CartRequestDto(request.pathVariable("user"), request.pathVariable("sku")))
                 .flatMap(cartService::removeItemFromCart)
                 .flatMap(cartRepository::save)
                 .flatMap(cart -> ServerResponse.ok().bodyValue(cart))
@@ -39,7 +38,7 @@ public class CartHandler {
     }
 
     public Mono<ServerResponse> getUserCart(ServerRequest request) {
-        return request.bodyToMono(UserRequestDto.class)
+        return Mono.just(request.pathVariable("user"))
                 .flatMap(cartService::getUserCart)
                 .flatMap(cart -> ServerResponse.ok().bodyValue(cart))
                 .switchIfEmpty(ServerResponse.unprocessableEntity()

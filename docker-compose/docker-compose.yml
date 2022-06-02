@@ -1,0 +1,138 @@
+version: "3.9"
+services:
+  db-produtos:
+    image: "postgres:latest"
+    container_name: "db-produtos"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=products
+    ports:
+      - "5432:5432"
+    depends_on:
+      - eureka-server
+    networks:
+      services-network-01:
+        aliases:
+          - db-produtos
+
+  db-usuarios:
+    image: "postgres:latest"
+    container_name: "db-usuarios"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=users
+    ports:
+      - "5433:5432"
+    depends_on:
+      - eureka-server
+    networks:
+      services-network-01:
+        aliases:
+          - db-usuarios
+
+  produtos-app:
+    image: "produtos-app"
+    container_name: "produtos-app-instance"
+    ports:
+      - "8080:80"
+    depends_on:
+      - db-produtos
+      - eureka-server
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-produtos:5432/products
+    networks:
+      services-network-01:
+        aliases:
+          - produtos-service
+
+  usuarios-app:
+    image: "usuario-app"
+    container_name: "usuarios-app-instance"
+    ports:
+      - "8081:80"
+    depends_on:
+      - db-usuarios
+      - eureka-server
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-usuarios:5432/users
+    networks:
+      services-network-01:
+        aliases:
+          - usuarios-service
+
+  vendas-mongo:
+    image: "mongo:latest"
+    container_name: "vendas-mongo"
+    ports:
+      - "27017:27017"
+    depends_on:
+      - eureka-server
+    networks:
+      services-network-01:
+        aliases:
+          - vendas-mongo
+
+  vendas-app:
+    image: "vendas-app"
+    container_name: "vendas-app-instance"
+    ports:
+      - "8082:80"
+    depends_on:
+      - eureka-server
+      - vendas-mongo
+      - usuarios-app
+      - produtos-app
+    environment:
+      SPRING_DATA_MONGODB_HOST: vendas-mongo
+    networks:
+      services-network-01:
+        aliases:
+          - vendas-service
+
+  prometheus:
+    image: "prom/prometheus"
+    container_name: prometheus-app
+    user: root
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/:/etc/prometheus
+      - ./prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      services-network-01:
+        aliases:
+          - prometheus-app
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:latest
+    volumes:
+      - ./grafana/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    networks:
+      services-network-01:
+        aliases:
+          - grafana
+
+  eureka-server:
+    image: "eureka-server"
+    ports:
+      - "8761:8761"
+    container_name: "eureka-server"
+    networks:
+      services-network-01:
+        aliases:
+          - eureka-server
+
+networks:
+  services-network-01:
+    name: services-network-01
+    driver: bridge

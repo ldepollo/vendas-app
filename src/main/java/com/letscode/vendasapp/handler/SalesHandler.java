@@ -1,11 +1,9 @@
 package com.letscode.vendasapp.handler;
 
 import com.letscode.vendasapp.domain.Sale;
-import com.letscode.vendasapp.dto.UserRequestDto;
 import com.letscode.vendasapp.repository.SalesRepository;
 import com.letscode.vendasapp.service.CartService;
 import com.letscode.vendasapp.service.SaleService;
-import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -26,8 +24,9 @@ public class SalesHandler {
     }
 
     public Mono<ServerResponse> makePurchase(ServerRequest request) {
-        return request.bodyToMono(UserRequestDto.class)
-                .flatMap(cartService::getUserCart)
+        return Mono.just(request.pathVariable("user"))
+                .flatMap(cartService::getOpenUserCart)
+                .flatMap(cartService::closeUserCart)
                 .flatMap(saleService::makePurchase)
                 .flatMap(salesRepository::save)
                 .flatMap(sale -> ServerResponse.ok().bodyValue(sale))
@@ -36,10 +35,8 @@ public class SalesHandler {
                         .bodyValue("Invalid username or this user does not have a cart yet"));
     }
 
-    public Mono<ServerResponse> getAllPurchases() {
-//        return Flux.from(salesRepository.findAll())
-//
-//                .flatMap(sales -> ServerResponse.ok().bodyValue(sales));
-        return null;
+    public Mono<ServerResponse> getAllPurchases(ServerRequest serverRequest) {
+        Flux<Sale> sales = salesRepository.findAll();
+        return sales.collectList().flatMap(s -> ServerResponse.ok().bodyValue(s));
     }
 }

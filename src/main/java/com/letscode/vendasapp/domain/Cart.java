@@ -34,6 +34,11 @@ public class Cart {
         return products;
     }
 
+    public List<Product> insertProduct(Product product) {
+        this.products.add(product);
+        return products;
+    }
+
     public void setProducts(List<Product> products) {
         this.products = products;
     }

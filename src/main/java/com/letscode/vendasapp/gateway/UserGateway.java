@@ -1,17 +1,14 @@
 package com.letscode.vendasapp.gateway;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
-import reactor.util.retry.RetrySpec;
-
-import java.time.Duration;
 
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserGateway {
 
     @Value("${usuarios.base.url}")

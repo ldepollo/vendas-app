@@ -1,0 +1,6 @@
+eureka:
+  client:
+    enabled: false
+
+produtos.base.url: http://localhost:9000/product/%s
+usuarios.base.url: http://localhost:9000/user/%s
